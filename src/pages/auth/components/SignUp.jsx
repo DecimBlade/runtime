@@ -32,14 +32,12 @@ export default function SignUp() {
             await signin(emailRef.current.value, passwordRef.current.value)
             const user = auth.currentUser
             const userRef = db.users.doc(user.uid)
-            const friendRef = db.friends.doc(user.uid)
-            
-            friendRef.set({
-                uid : user.uid,
-                username: "",
-                friendsList: [],
-                pendingFriends: [] 
-            })
+
+            // added 4:18pm 3/16
+            const friendsRef = db.users.doc(user.uid);
+            await friendsRef.collection('friends').doc().set({});
+            const pendingFriendsRef = db.users.doc(user.uid);
+            await pendingFriendsRef.collection('pending-friends').doc().set({});
 
             userRef.set({
                 email: emailRef.current.value,
@@ -51,6 +49,8 @@ export default function SignUp() {
                 profilePic:"",
                 colorTheme: ""
             })
+
+
         navigation("/set-profile")
     } catch {
         setError("Failed to create an account")

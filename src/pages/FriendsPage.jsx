@@ -9,14 +9,22 @@ import FriendsList from './FriendsList';
 import Chat from '../components/chat/Chat.jsx';
 
 export default function FriendsPage() {
-   const usernameRef = useRef()
+    const usernameRef = useRef()
     const {currentUser} = useAuth()
     const [inputValue, setInputValue] = useState('')
+
+    const [username, setUsername] = useState('');
+
     const [addFriendError, setAddFriendError] = useState('')
     const user = auth.currentUser;
-    const friendRef = db.friends.doc(user.uid)
+
+    const friendRequestRef = db.users.doc(currentUser.uid).collection("pending-friends");
+    console.log(friendRequestRef.doc('hctDaUDb76xGdiy6tRMh').get());
 
     const [error, setError] = useState('')
+
+    //new 
+    const [friendUsername, setFriendUsername] = useState('');
 
     const handleClearClick = () =>
     {
@@ -27,18 +35,39 @@ export default function FriendsPage() {
         setInputValue(event.target.value);
     };
 
-    async function handleAddFriend(e) {
-        e.preventDefault()
-        const snapshot = await db.users.where("username", "==", usernameRef.current.value).get();
-        if(!(snapshot.empty)) {
-            let friendRequest = {}
-            friendRequest[usernameRef.current.value] = "pending"
-            friendRef.update(friendRequest)
-            setAddFriendError("Friend request sent.")
-        } else {
-            setAddFriendError("User does not exist.")
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const usersRef = db.users;
+        const querySnapshot = await usersRef.where('username', '==', username).get();
+
+        if (querySnapshot.empty) {
+            setAddFriendError('No user found with that username.');
+            return;
         }
-    }
+
+        
+        const otherUserDoc = querySnapshot.docs[0];
+        console.log(querySnapshot.get());
+
+        console.log(otherUserDoc.uid);
+        const otherUserId = otherUserDoc.uid;
+        // idk if this is right^
+        
+        const otherUserRef = usersRef.doc(otherUserId);
+        const pendingFriendsCollectionRef = otherUserRef.collection('pending-friends');
+
+        const newFriend = {
+            username : friendUsername,
+        };
+
+        try {
+            await pendingFriendsCollectionRef.add(newFriend);
+            setAddFriendError('Friend added successfully!');
+            setFriendUsername('');
+        } catch (error) {
+            setAddFriendError('Error adding friend');
+        }
+    };
 
     return (
       <div>
@@ -53,9 +82,18 @@ export default function FriendsPage() {
     </div>
     <div>
         {addFriendError}
-        <form onSubmit={handleAddFriend}>
-        <input type='text' ref={usernameRef} onChange={handleInputChange} value={inputValue} placeholder="Friend's Username"></input>
-        <button type='submit'  class="btn btn-primary my-6 w-32 duration-200 bg-slate-500 hover:bg-slate-700 text-black font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline">Add Friends</button>
+        <form onSubmit={handleSubmit}>
+        <h3>Add a new friend</h3>
+        <label>
+        Name:
+        <input
+            type="text"
+            placeholder="Friend's Username"
+            value={friendUsername}
+            onChange={(e) => setFriendUsername(e.target.value)}
+        />
+        </label>
+        <button type="submit">Add Friend</button>
         </form>
         </div>
         
@@ -69,7 +107,8 @@ export default function FriendsPage() {
 
 export function RenderFriendsList() {
 
-    const userId = 'zCsrEK96qiZwGcp0LxWRmWl7jTI2';
+    const {currentUser} = useAuth();
+    const userId = currentUser.uid;
     
     return (
         <div>
