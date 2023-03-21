@@ -11,16 +11,8 @@ import Chat from '../components/chat/Chat.jsx';
 export default function FriendsPage() {
     const friendRef = useState('');
     const user = useAuth();
-    const messagesRef = {
-        db
-        .users
-        .where("username", "==", user.username)
-        .get()
-        .collection("friends")
-        .where("username", "==", friendRef)
-        .get()
-        .collection("messages")
-    }
+    const messagesRef = db.users.where("username", "==", user.username).get().collection("friends").where("username", "==", friendRef).get().collection("messages");
+                
 
 
     return (
