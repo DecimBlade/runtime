@@ -45,7 +45,6 @@ const Chat = ({ user }) => {
                 .collection("messages")
                 .add({
                     message: newMessage.trim(),
-                    sender: user.displayName,
                     timestamp: db.FieldValue.serverTimestamp(),
                 });
             setNewMessage("");
