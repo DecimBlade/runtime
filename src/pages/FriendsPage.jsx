@@ -6,7 +6,7 @@ import '../App.css';
 import { useAuth } from "./auth/contexts/AuthContext";
 import { auth, db } from '../firebase';
 import FriendsList from './FriendsList';
-import Chat from '../components/chat/Chat.jsx';
+import ChatApp from '../components/chat/Chat.jsx';
 
 export default function FriendsPage() {
     const usernameRef = useRef()
@@ -96,11 +96,11 @@ export default function FriendsPage() {
         <button type="submit">Add Friend</button>
         </form>
         </div>
-        
 
-    <div>
-        <Chat user={user} />
-    </div>
+        <div>
+        <ChatApp />
+        </div>
+
         </div>
     );
 }

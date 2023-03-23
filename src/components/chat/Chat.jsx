@@ -1,90 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { db } from '../../firebase';
+import React, { useState, useEffect } from 'react';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import '../../App.css';
+import { useAuth } from "../../pages/auth/contexts/AuthContext.js";
+import { auth, db } from '../../firebase.js';
+import Channel from './Channel';
 
-const Chat = ({ user }) => {
-    const [friends, setFriends] = useState([]);
-    const [selectedFriend, setSelectedFriend] = useState(null);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState("");
+function ChatApp() {
 
-    useEffect(() => {
-        const unsubscribe = db
-            .users
-            .doc(user.uid)
-            .collection("friends")
-            .onSnapshot((snapshot) => {
-                const friendsList = snapshot.docs.map((doc) => doc.data().friend);
-                setFriends(friendsList);
-            });
-        return unsubscribe;
-    }, [user]);
-
-    useEffect(() => {
-        if (selectedFriend) {
-            const unsubscribe = db
-                .users
-                .doc(user.uid)
-                .collection("friends")
-                .doc(selectedFriend)
-                .collection("messages")
-                .orderBy("timestamp", "asc")
-                .onSnapshot((snapshot) => {
-                    const messagesList = snapshot.docs.map((doc) => doc.data());
-                    setMessages(messagesList);
-                });
-            return unsubscribe;
-        }
-    }, [user, selectedFriend]);
-
-    const handleSendMessage = () => {
-        if (newMessage.trim() !== "") {
-            db.users
-                .doc(user.uid)
-                .collection("friends")
-                .doc(selectedFriend)
-                .collection("messages")
-                .add({
-                    message: newMessage.trim(),
-                    timestamp: db.FieldValue.serverTimestamp(),
-                });
-            setNewMessage("");
-        }
-    };
+    const {currentUser} = useAuth();
 
     return (
-        <>
-        <h2>Friends:</h2>
-        <ul>
-        {friends.map((friend) => (
-            <li key={friend} onClick={() => setSelectedFriend(friend)}>
-            {friend}
-            </li>
-        ))}
-        </ul>
-        {selectedFriend && (
-            <>
-            <h2>Chat with {selectedFriend}:</h2>
-            <ul>
-            {messages.map((message) => (
-                <li key={message.timestamp}>
-                <strong>{message.sender}: </strong>
-                {message.message}
-                </li>
-            ))}
-            </ul>
-            <div>
-            <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            />
-            <button onClick={handleSendMessage}>Send</button>
-            </div>
-            </>
-        )}
-        </>
+        <div>
+            <p>Welcome to the chat</p>
+            <Channel currentUser={currentUser} />
+        </div>
     );
-};
+}
 
-export default Chat;
-
+export default ChatApp;
