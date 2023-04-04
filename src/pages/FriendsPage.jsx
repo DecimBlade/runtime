@@ -1,6 +1,6 @@
-import firebase from 'firebase/app';
-import 'firebase/database';
-import 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/database';
+import 'firebase/compat/auth';
 import React, { useRef, useState, useEffect } from 'react';
 import '../App.css';
 import { useAuth } from "./auth/contexts/AuthContext";
@@ -110,7 +110,7 @@ export default function FriendsPage() {
   <div className="flex flex-col items-center justify-end md:flex-row md:justify-between">
     <div className="w-full md:w-1/2 flex flex-col items-center md:order-3">
       <h2 className="text-xl font-semibold mb-4">Chat</h2>
-      <Chat user={user} />
+      <Chat currentUser={currentUser}/>
     </div>
     <div className="md:order-2">
       <RenderFriendsList />

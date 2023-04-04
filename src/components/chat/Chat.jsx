@@ -1,90 +1,99 @@
-import React, { useState, useEffect } from "react";
-import { db } from '../../firebase';
+import React, { useState, useEffect } from 'react';
+import { db } from '../../firebase.js';
+import { useAuth } from '../../pages/auth/contexts/AuthContext.js';
 
-const Chat = ({ user }) => {
-    const [friends, setFriends] = useState([]);
-    const [selectedFriend, setSelectedFriend] = useState(null);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState("");
+const Chat = ({ currentUser }) => {
+  const [friends, setFriends] = useState([]);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [messages, setMessages] = useState([]);
 
-    useEffect(() => {
-        const unsubscribe = db
-            .users
-            .doc(user.uid)
-            .collection("friends")
-            .onSnapshot((snapshot) => {
-                const friendsList = snapshot.docs.map((doc) => doc.data().friend);
-                setFriends(friendsList);
-            });
-        return unsubscribe;
-    }, [user]);
+  useEffect(() => {
+    const unsubscribe = db
+      .users
+      .doc(currentUser.uid)
+      .collection('friends')
+      .onSnapshot((snapshot) => {
+        const friendsList = snapshot.docs.map((doc) => {
+          return { id: doc.id, ...doc.data() };
+        });
+        setFriends(friendsList);
+      });
+    return unsubscribe;
+  }, [db, currentUser.uid]);
 
-    useEffect(() => {
-        if (selectedFriend) {
-            const unsubscribe = db
-                .users
-                .doc(user.uid)
-                .collection("friends")
-                .doc(selectedFriend)
-                .collection("messages")
-                .orderBy("timestamp", "asc")
-                .onSnapshot((snapshot) => {
-                    const messagesList = snapshot.docs.map((doc) => doc.data());
-                    setMessages(messagesList);
-                });
-            return unsubscribe;
-        }
-    }, [user, selectedFriend]);
+  useEffect(() => {
+    const unsubscribe = db
+      .users
+      .doc(currentUser.uid)
+      .collection('friends')
+      .doc(selectedFriend?.id)
+      .collection('messages')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot((snapshot) => {
+        const messagesList = snapshot.docs.map((doc) => {
+          return { id: doc.id, ...doc.data() };
+        });
+        setMessages(messagesList);
+      });
+    return unsubscribe;
+  }, [db, currentUser.uid, selectedFriend?.id]);
 
-    const handleSendMessage = () => {
-        if (newMessage.trim() !== "") {
-            db.users
-                .doc(user.uid)
-                .collection("friends")
-                .doc(selectedFriend)
-                .collection("messages")
-                .add({
-                    message: newMessage.trim(),
-                    sender: user.displayName,
-                    timestamp: db.FieldValue.serverTimestamp(),
-                });
-            setNewMessage("");
-        }
-    };
+  const handleSelectFriend = (friend) => {
+    setSelectedFriend(friend);
+  };
 
-    return (
-        <>
-        <h2>Friends:</h2>
+  const handleSendMessage = (message) => {
+    const { uid, displayName, photoURL } = currentUser;
+    db.collection('users')
+      .doc(currentUser.uid)
+      .collection('messages')
+      .doc(selectedFriend.id)
+      .collection('messages')
+      .add({
+        text: message,
+        createdAt: db.FieldValue.serverTimestamp(),
+        senderId: uid,
+        senderName: displayName,
+        senderPhotoURL: photoURL,
+      });
+  };
+
+  return (
+    <div>
+      <h2>Direct Messages</h2>
+      <div>
+        <h3>Friends</h3>
         <ul>
-        {friends.map((friend) => (
-            <li key={friend} onClick={() => setSelectedFriend(friend)}>
-            {friend}
+          {friends.map((friend) => (
+            <li key={friend.id} onClick={() => handleSelectFriend(friend)}>
+              {friend.displayName}
             </li>
-        ))}
+          ))}
         </ul>
-        {selectedFriend && (
-            <>
-            <h2>Chat with {selectedFriend}:</h2>
-            <ul>
+      </div>
+      {selectedFriend && (
+        <div>
+          <h3>Conversation with {selectedFriend.displayName}</h3>
+          <ul>
             {messages.map((message) => (
-                <li key={message.timestamp}>
-                <strong>{message.sender}: </strong>
-                {message.message}
-                </li>
+              <li key={message.id}>
+                <strong>{message.senderName}: </strong>
+                {message.text}
+              </li>
             ))}
-            </ul>
-            <div>
-            <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            />
-            <button onClick={handleSendMessage}>Send</button>
-            </div>
-            </>
-        )}
-        </>
-    );
+          </ul>
+          <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage(e.target.elements.message.value);
+              e.target.reset();
+            }}>
+            <input type="text" name="message" placeholder="Type your message here" />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Chat;
