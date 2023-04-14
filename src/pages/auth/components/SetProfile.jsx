@@ -152,6 +152,7 @@ export default function SetProfile() {
             });
             setImage(null);
         }).catch(error => {
+            alert("Error Uploading Image")
             console.log(error.message);
         });
     };
@@ -185,6 +186,7 @@ export default function SetProfile() {
                 </div>
                 <div class="flex justify-center p-2">
                     <button onClick={handleProfileSubmit} class="w-full px-4 py-2 text-white bg-blue-500 rounded shadow-xl">Upload</button>
+                    
                 </div>
             </div>
         </div> 
