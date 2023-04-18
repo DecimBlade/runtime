@@ -10,6 +10,7 @@ import { DarkModeSwitch } from "react-toggle-dark-mode";
 import DarkMode from "../../../features/profile/components/darkMode";
 // import ProfileUploadPopup from "../../../features/profile/components/ProfileUploadPopup"
 import Avatar from '@mui/material/Avatar';
+// import firebase from "firebase/compat/app";
 
 // profile creation page from the sign in page
 // rerouting from the sign in page to the profile creation page
@@ -136,8 +137,12 @@ export default function SetProfile() {
     const [url, setUrl] = useState(null);
 
     const handleImageChange = (e) => {
-        if(e.target.files[0]){
-            setImage(e.target.files[0]);
+
+        var file = e.target.files[0];
+        // var storageRef = firebase.storage().ref(username + '/profilePictures/' + file.name)
+        // var uploadTask = storageRef.put(file);
+        if(file){
+            setImage(file);
         }
     };
     console.log(image);
@@ -334,7 +339,7 @@ export default function SetProfile() {
             <Card className="bg-white dark:bg-slate-700 py-8 px-8 rounded-lg">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">Profile Picture</h1>
-                        <div>
+                        {/* <div>
                             <button className="w-32 h-32 rounded-full object-cover mx-auto bg-gray-600 dark:bg-white text-white" onClick={() => setIsOpen(true)}>Profile Icon</button>
 
                             {isOpen && (
@@ -345,7 +350,7 @@ export default function SetProfile() {
                                     <button className = "text-white dark:text-black dark:bg-white bg-blue-500 px-2 rounded-lg" onClick={() => setIsOpen(false)}>Close</button>
                                 </div>
                             )}
-                        </div>
+                        </div> */}
                     {ProfileUpload()}
                 </div>
             </Card>
