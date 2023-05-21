@@ -39,7 +39,7 @@ const SendMessage = () => {
   };
 
   return (
-    <form className="flex flex-col items-center pt-6">
+    <form className="flex flex-col items-center pt-6 pos-abs">
       <input
         className="flex flex-col border border-gray-300 p-2 rounded-md mb-4 w-full md:w-11/12 lg:w-11/12"
         placeholder="Type your message..." 
