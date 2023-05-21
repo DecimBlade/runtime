@@ -147,7 +147,7 @@ export default function FriendsPage() {
                   onChange={handleInputChange}
                   value={inputValue}
                   placeholder="Friend's Username"
-                  className="border border-gray-300 p-2 rounded-md mb-4 w-full md:w-4/5 lg:w-3/5"
+                  className="border border-gray-300 p-2 rounded-md mb-4 w-full md:w-4/5 lg:w-4/5"
                 />
                 <button
                   type="submit"
